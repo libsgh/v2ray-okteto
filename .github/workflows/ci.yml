@@ -1,0 +1,44 @@
+# 编译的名称
+name: 自动部署okteto
+
+on:
+  repository_dispatch:
+# 任务集
+jobs:
+  build:
+    # 选择虚拟环境
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+    
+    # 运行步骤
+    steps:
+    
+    # 准备完毕
+    - name: 准备完毕
+      uses: actions/checkout@v2
+    
+    - name: 登录okteto
+      uses: okteto/login@master
+      with:
+        token: ${{ secrets.OKTETO_TOKEN }}
+
+    - name: "激活命名空间"
+      uses: okteto/namespace@master
+      with:
+        name: libsgh
+
+    - name: "销毁流程"
+      uses: okteto/destroy-pipeline@master
+      with:
+        name: okteto-pipeline
+        
+    - name: "触发流程"
+      uses: okteto/pipeline@master
+      with:
+        name: okteto-pipeline
+        
+    - name: "上传至okteto"
+      uses: okteto/push@master
+      with:
+        namespace: libsgh
+        name: v2ray-okteto
